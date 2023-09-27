@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:worthy/screens/home_screen.dart';
+import 'package:worthy/services/login_service.dart';
+import 'package:worthy/utils/alert.dart';
 import 'package:worthy/utils/nav.dart';
 import 'package:worthy/widgets/custom_form_field.dart';
 import 'package:worthy/widgets/custom_ink_well.dart';
@@ -16,6 +18,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _passController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final FocusNode _focusPassword = FocusNode();
+  bool _showProgress = false;
 
   @override
   Widget build(BuildContext context) {
@@ -82,7 +85,13 @@ class _LoginScreenState extends State<LoginScreen> {
                     focusNode: _focusPassword,
                   ),
                   const SizedBox(height: 25,),
-                  _buildSignInButton(_onSignIn),
+                  _showProgress ?
+                    Center(
+                      child: CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF9CFF7B)),
+                      ),
+                    ) :
+                    _buildSignInButton(_onSignIn),
                   const SizedBox(height: 15,),
                   Row(
                     children: [
@@ -111,7 +120,8 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Widget _buildSignInButton(void Function() onTap) {
-    return ClipRRect(
+    return
+      ClipRRect(
       borderRadius: const BorderRadius.all(Radius.circular(10)),
       child: SizedBox(
         width: 329,
@@ -135,11 +145,7 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  _onFieldSubmitted(String text) {
-    FocusScope.of(context).requestFocus(_focusPassword);
-  }
-
-  void _onSignIn() {
+  void _onSignIn() async {
     bool _validForm = _formKey.currentState!.validate();
     if(! _validForm) return;
 
@@ -147,7 +153,20 @@ class _LoginScreenState extends State<LoginScreen> {
     String psswd = _passController.text;
     print("Login: $login : Password: $psswd");
 
-    push(context, const HomeScreen());
+
+    setState(() {
+      _showProgress = true;
+    });
+
+    if (await LoginService.login(login, psswd)) {
+      pushReplacement(context, const HomeScreen());
+    } else {
+      alert(context, 'Login Incorreto');
+    }
+
+    setState(() {
+      _showProgress = false;
+    });
   }
 
   void _signUp() {
