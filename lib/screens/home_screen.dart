@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:worthy/widgets/sidebar.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -13,8 +14,10 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Worthy'),
+        backgroundColor: Color(0xFF4CA237),
       ),
       body: _body(),
+      drawer: Sidebar(),
     );
   }
 
